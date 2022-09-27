@@ -289,7 +289,7 @@ def get_geographical_heuristic(node,goal):
     i_delta = pow(i - i_goal,2)
     j_delta = pow(j - j_goal,2)
 
-    geo_dist = math.sqrt((i_delta) + (j_delta))
+    geo_dist = ((i_delta) + (j_delta))**1/2
     return geo_dist
 
 
