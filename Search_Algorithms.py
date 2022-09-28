@@ -1,4 +1,5 @@
 # coding=utf-8
+
 """
 This file is your main submission that will be graded against. Only copy-paste
 code on the relevant classes included here. Do not add any classes or functions
@@ -191,7 +192,7 @@ def is_this_node_in_frontier(node, frontier):
     return False
 
 
-def astar_search(graph, start, goal):
+def astar_search(graph, start, goal,m):#added a new parameter m to pass manhattan,geographical function
 
     path = []
     explored_nodes = list()
@@ -201,14 +202,14 @@ def astar_search(graph, start, goal):
         return path, explored_nodes
 
     path.append(start)
-    path_cost = get_geographical_heuristic(start, goal)
+    path_cost = m(start, goal)
     # Priority Queue to keep sorted distance travelled till now
     frontier = [(path_cost, path)]
     while len(frontier) > 0:
         # pop a node from the queue
         path_cost_till_now, path_till_now = pop_frontier(frontier)
         current_node = path_till_now[-1]
-        path_cost_till_now = path_cost_till_now - get_geographical_heuristic(current_node, goal)
+        path_cost_till_now = path_cost_till_now - m(current_node, goal)
         explored_nodes.append(current_node)
         # test goal condition
         if current_node == goal:
@@ -226,7 +227,7 @@ def astar_search(graph, start, goal):
 
             # extra_cost = graph.get_edge_weight(current_node, neighbour)
             extra_cost = 1
-            neighbour_cost = extra_cost + path_cost_till_now + get_geographical_heuristic(neighbour, goal)
+            neighbour_cost = extra_cost + path_cost_till_now + m(neighbour, goal)
             new_element = (neighbour_cost, path_to_neighbour)
 
             is_there, indexx, neighbour_old_cost, _ = get_frontier_params_new(neighbour, frontier)
@@ -283,39 +284,68 @@ def get_frontier_params(node, frontier):
             return True, i, cost, path
 
     return False, None, None, None
-def get_geographical_heuristic(node,goal):
-    i,j = divmod(int(node), 8)
-    i_goal, j_goal = divmod(int(goal), 8)
-    i_delta = pow(i - i_goal,2)
-    j_delta = pow(j - j_goal,2)
 
-    geo_dist = ((i_delta) + (j_delta))**1/2
-    return geo_dist
+
+def get_manhattan_heuristic(node, goal):
+    i, j = divmod(int(node), 8)
+    i_goal, j_goal = divmod(int(goal), 8)
+    i_delta = abs(i - i_goal)
+    j_delta = abs(j - j_goal)
+
+    manhattan_dist = i_delta + j_delta
+    return manhattan_dist
+
+def get_geographical_heuristic(node, goal):
+    i, j = divmod(int(node), 8)
+    i_goal, j_goal = divmod(int(goal), 8)
+    i_delta = abs(i - i_goal)
+    j_delta = abs(j - j_goal)
+
+    manhattan_dist = (i_delta)**2 + (j_delta)**2
+    manhattan_dist_sqrt=math.sqrt(manhattan_dist)
+    return (manhattan_dist_sqrt)
 
 
 if __name__ == '__main__':
     graph_neighbours = generate_graph()
-
-    # print("============ UCS Search ================")
-    # path_ucs, explored_ucs = uniform_cost_search(graph_neighbours, '0', '61')
-    # print("Path UCS:", path_ucs)
-    # # print("Explored Nodes UCS: ", explored_ucs)
-    # print(len(explored_ucs))
-    # print()
-
-    print("============ Greedy Search ================")
-    path_astar, explored_astar = astar_search(graph_neighbours, '0', '31')
+    
+    '''print("============ UCS Search ================")
+    path_ucs, explored_ucs = uniform_cost_search(graph_neighbours, '0', '61')
+    print("Path UCS:", path_ucs)
+    # print("Explored Nodes UCS: ", explored_ucs)
+    print(len(explored_ucs))
+    print()'''
+    
+    print("============ AStar Search ================")
+    print("Manhattan heuristic")
+    path_astar, explored_astar = astar_search(graph_neighbours, '0', '27',get_manhattan_heuristic )
     print("Path_astar:", path_astar)
     print("Explored Nodes A Star: ", explored_astar)
-    print(len(explored_astar))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    print(len(explored_astar))
     print()
+    print("Geographical heuristic")
+    path_astar, explored_astar = astar_search(graph_neighbours, '0', '27',get_geographical_heuristic)
+    print("Path_astar:", path_astar)
+    print("Explored Nodes A Star: ", explored_astar)
+    print(len(explored_astar))
+    print()
+    print("============ Bottleneck Astar Search using geographical heuristic================")
+    path_1, explored_1 = astar_search(graph_neighbours, '0', '27', get_geographical_heuristic)
+    path_2, explored_2 = astar_search(graph_neighbours, '35', '61', get_geographical_heuristic)
+    print("Path1:", path_1)
+    print("Path_2:", path_2)
 
-    # print("============ Bottleneck Astar Search ================")
-    # path_1, explored_1 = astar_search(graph_neighbours, '0', '27')
-    # path_2, explored_2 = astar_search(graph_neighbours, '35', '61')
-    # print("Path1:", path_1)
-    # print("Path_2:", path_2)
+    print("Explored Nodes1: ", explored_1)
+    print("Explored Nodes2: ", explored_2)
+    print(len(explored_1) + len(explored_2))
+    
+    print("============ Bottleneck Astar Search using manhattan heuristic================")
+    path_1, explored_1 = astar_search(graph_neighbours, '0', '27', get_manhattan_heuristic)
+    path_2, explored_2 = astar_search(graph_neighbours, '35', '61', get_manhattan_heuristic)
+    print("Path1:", path_1)
+    print("Path_2:", path_2)
 
-    # print("Explored Nodes1: ", explored_1)
-    # print("Explored Nodes2: ", explored_2)
-    # print(len(explored_1) + len(explored_2))
+    print("Explored Nodes1: ", explored_1)
+    print("Explored Nodes2: ", explored_2)
+    print(len(explored_1) + len(explored_2))
+    
